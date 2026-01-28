@@ -1,0 +1,188 @@
+# AI Coding Assistant Rules for React Performance
+
+## Context
+You are assisting with a **Next.js 16 + React 19 + TypeScript + Turborepo** monorepo application. Follow these performance best practices.
+
+## Priority Order
+When reviewing or writing code, apply optimizations in this order:
+
+1. **CRITICAL**: Waterfalls & Bundle Size
+2. **HIGH**: Server-Side & Client Fetching
+3. **MEDIUM**: Re-renders & Rendering
+4. **LOW**: Advanced Patterns & JavaScript
+
+## Automatic Checks
+
+### On Code Review
+- [ ] Check for sequential `await` statements that could be parallelized
+- [ ] Look for cascading `useEffect` hooks
+- [ ] Verify dynamic imports for route components
+- [ ] Check for barrel file imports (use direct imports instead)
+- [ ] Identify components that could use `React.memo`
+- [ ] Flag expensive calculations without `useMemo`
+- [ ] Verify callback functions use `useCallback` when passed as props
+- [ ] Check for array indices used as keys
+
+### On New Code
+- [ ] Suggest `Promise.all()` for independent async operations
+- [ ] Recommend lazy loading for routes and heavy components
+- [ ] Propose virtualization for lists > 50 items
+- [ ] Suggest data fetching library (React Query/SWR) over manual fetch
+- [ ] Recommend moving state closer to where it's used
+- [ ] Propose extracting components with local state
+
+### On Refactoring
+- [ ] Identify opportunities to reduce bundle size
+- [ ] Find components that re-render unnecessarily
+- [ ] Suggest combining multiple loop iterations
+- [ ] Recommend using `Map`/`Set` for O(1) lookups
+- [ ] Flag potential memory leaks (missing cleanup)
+
+## Code Patterns
+
+### ❌ Avoid
+```typescript
+// Sequential awaits
+const user = await fetchUser();
+const posts = await fetchPosts();
+
+// Barrel imports
+import { Button } from '@/components';
+
+// Inline objects as props
+<Component config={{ theme: 'dark' }} />
+
+// Array index as key
+{items.map((item, i) => <Item key={i} />)}
+
+// Expensive init on every render
+const [data] = useState(JSON.parse(localStorage.getItem('key')));
+```
+
+### ✅ Prefer
+```typescript
+// Parallel execution
+const [user, posts] = await Promise.all([fetchUser(), fetchPosts()]);
+
+// Direct imports
+import { Button } from '@/components/ui/button';
+
+// Memoized objects
+const config = useMemo(() => ({ theme: 'dark' }), []);
+<Component config={config} />
+
+// Stable key
+{items.map(item => <Item key={item.id} />)}
+
+// Lazy initialization
+const [data] = useState(() => JSON.parse(localStorage.getItem('key') || '{}'));
+```
+
+## Quick Reference
+
+### Waterfalls (CRITICAL)
+- Use `Promise.all()` for independent operations
+- Move conditional logic before `await` statements
+- Combine cascading `useEffect` hooks
+- Start data fetching early (in route loaders)
+
+### Bundle Size (CRITICAL)
+- Lazy load routes: `const Page = lazy(() => import('./Page'))` (or use Next.js dynamic imports)
+- Import specific functions: `import { format } from 'date-fns'`
+- Avoid barrel file imports from packages
+- Use tree-shakeable libraries
+- Prefer Server Components (zero client JS) over Client Components
+- Use `next/dynamic` with `{ ssr: false }` for client-only heavy components
+
+### Re-renders (MEDIUM)
+- Move state down to reduce scope
+- Use `React.memo` for pure components
+- Wrap callbacks with `useCallback`
+- Memoize expensive calculations with `useMemo`
+- Initialize state lazily with arrow function
+
+### Rendering (MEDIUM)
+- Virtualize lists > 50 items with `react-window`
+- Use stable IDs as keys, never use index
+- Prefer CSS animations over JavaScript
+- Debounce expensive operations with `useDeferredValue`
+
+## When to Speak Up
+
+### 🚨 Always Flag
+- Sequential `await` that could be parallel
+- Large imports that should be lazy loaded
+- Components re-rendering unnecessarily
+- Array indices used as keys in lists
+
+### ⚠️ Suggest When Appropriate
+- Moving state closer to usage
+- Using a data fetching library
+- Implementing optimistic updates
+- Virtualizing long lists
+
+### 💡 Mention If Relevant
+- Web Workers for heavy computation
+- Intersection Observer for lazy loading
+- Request cancellation for search
+- Using `Map`/`Set` for faster lookups
+
+## Project-Specific Context
+
+### Tech Stack
+- React 19 (NO `forwardRef`, use `ref` prop directly)
+- Next.js 16 (App Router, Server Components by default)
+- TypeScript (strict mode)
+- Turborepo (monorepo orchestration)
+- @tanstack/react-query (data fetching & caching)
+- pnpm (package manager)
+- shadcn/ui (component library in @repo/ui package)
+- Tailwind CSS v4 (CSS-based, no JS runtime overhead)
+
+### Architecture
+- **Monorepo Structure**: Turborepo with apps/ and packages/ organization
+- **Apps**: `apps/web` - Next.js 16 application
+- **Packages**:
+  - `@repo/ui` - Shared React components (shadcn/ui based)
+  - `@repo/tailwind-config` - Shared Tailwind CSS config
+  - `@repo/eslint-config` - Shared ESLint configurations
+  - `@repo/typescript-config` - Shared TypeScript configs
+- **Server Components**: Default for pages, use 'use client' directive when needed
+- **Services layer**: For API calls (can be hooks with React Query)
+- **Components**: Presentational, prefer Server Components unless client interactivity needed
+- **State management**: React Query for server state, React 19 hooks for local UI state
+
+## Response Format
+
+When suggesting optimizations:
+
+1. **Explain the issue**: What's the performance problem?
+2. **Show the impact**: How much time/bytes could be saved?
+3. **Provide code**: Show before/after examples
+4. **Prioritize**: Is this CRITICAL, HIGH, MEDIUM, or LOW?
+
+Example:
+```
+🚨 CRITICAL: Sequential Awaits Detected
+
+The current code fetches user data sequentially, adding unnecessary wait time:
+- Current: 150ms + 120ms = 270ms
+- Optimized: max(150ms, 120ms) = 150ms
+- Savings: 120ms (44% faster)
+
+[Show before/after code]
+```
+
+## Remember
+- Start with CRITICAL issues (waterfalls, bundle size)
+- Focus on measurable impact (ms saved, KB reduced)
+- Don't over-optimize - some patterns are fine at small scale
+- Consider readability vs performance tradeoffs
+- Provide specific, actionable suggestions
+- **Prefer Server Components** - only use Client Components when needed for interactivity
+- **Use React Query** for data fetching over manual fetch
+- **pnpm** is the package manager - always use pnpm commands
+
+For full details, see the skills directory:
+- `.agents/skills/vercel-react-best-practices/` - React 19 performance rules
+- `.agents/skills/turborepo/` - Turborepo monorepo best practices
