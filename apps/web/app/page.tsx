@@ -1,10 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { DatePicker } from '@/components/date-picker';
 import { GamesList } from '@/components/games-list';
+
+// Lazy load React Query devtools only in development
+const ReactQueryDevtools = lazy(() =>
+  import('@tanstack/react-query-devtools').then((mod) => ({
+    default: mod.ReactQueryDevtools,
+  }))
+);
 
 // Create QueryClient with proper configuration
 const queryClient = new QueryClient({
@@ -68,7 +74,10 @@ export default function ScoreboardPage() {
       <main className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900">
         <div className="container mx-auto px-4 py-8 max-w-7xl">
           <header className="mb-8">
-            <h1 className="text-4xl font-bold text-white mb-4">
+            <h1 
+              className="text-4xl font-bold text-white mb-4"
+              id="page-title"
+            >
               NBA Scoreboard
             </h1>
             {/* Suppress hydration warning for date picker since we intentionally update after mount */}
@@ -83,7 +92,9 @@ export default function ScoreboardPage() {
         </div>
       </main>
       {process.env.NODE_ENV === 'development' && (
-        <ReactQueryDevtools initialIsOpen={false} />
+        <Suspense fallback={null}>
+          <ReactQueryDevtools initialIsOpen={false} />
+        </Suspense>
       )}
     </QueryClientProvider>
   );

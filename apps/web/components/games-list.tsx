@@ -24,7 +24,12 @@ export function GamesList({ selectedDate }: GamesListProps) {
   // Loading state - show 6 skeleton cards
   if (isLoading) {
     return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div 
+        className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+        role="status"
+        aria-live="polite"
+        aria-label="Loading games"
+      >
         {[...Array(6)].map((_, i) => (
           <GameCardSkeleton key={i} />
         ))}

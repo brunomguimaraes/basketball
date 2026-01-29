@@ -38,7 +38,11 @@ function GameCardComponent({ game }: GameCardProps) {
       whileHover={{ scale: 1.02, y: -4 }}
       transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
     >
-      <Card className="bg-white/5 border-white/10 backdrop-blur-sm hover:bg-white/10 transition-colors">
+      <Card 
+        className="bg-white/5 border-white/10 backdrop-blur-sm hover:bg-white/10 transition-colors"
+        role="article"
+        aria-label={`Game: ${game.visitor_team.full_name} at ${game.home_team.full_name}`}
+      >
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="text-white text-lg">

@@ -22,6 +22,9 @@ export function DatePicker({ selected, onSelect }: DatePickerProps) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
+        aria-label="Select date to view NBA games"
+        aria-expanded={open}
+        aria-haspopup="dialog"
         className={cn(
           'inline-flex items-center justify-start text-left font-normal',
           'h-9 gap-1.5 px-2.5 rounded-md border text-sm',

@@ -4,7 +4,11 @@ import { Card, CardHeader, CardContent } from '@repo/ui/card';
 
 export function GameCardSkeleton() {
   return (
-    <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+    <Card 
+      className="bg-white/5 border-white/10 backdrop-blur-sm"
+      role="status"
+      aria-label="Loading game information"
+    >
       <CardHeader>
         <div className="flex items-center justify-between">
           {/* Time skeleton */}
@@ -38,6 +42,7 @@ export function GameCardSkeleton() {
           <div className="h-8 w-12 bg-white/10 rounded animate-pulse-glow" />
         </div>
       </CardContent>
+      <span className="sr-only">Loading game data...</span>
     </Card>
   );
 }

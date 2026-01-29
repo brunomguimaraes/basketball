@@ -9,7 +9,11 @@ interface EmptyStateProps {
 
 export function EmptyState({ date }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[400px] text-center px-4">
+    <div 
+      className="flex flex-col items-center justify-center min-h-[400px] text-center px-4"
+      role="status"
+      aria-live="polite"
+    >
       <div className="bg-white/5 rounded-full p-6 mb-6">
         <Calendar className="w-16 h-16 text-white/50" />
       </div>
