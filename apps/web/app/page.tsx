@@ -1,9 +1,18 @@
 'use client';
 
-import { useState, useEffect, lazy, Suspense, useMemo } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
+import dynamic from 'next/dynamic';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DatePicker } from '@/components/date-picker';
-import { GamesList } from '@/components/games-list';
+import { restoreCache, persistCache } from '@/lib/utils/query-cache-persister';
+
+// Dynamically import GamesList with no SSR - this ensures:
+// 1. No server-side render (avoids hydration mismatch)
+// 2. Client renders with localStorage access from the start
+const GamesList = dynamic(() => import('@/components/games-list').then(mod => ({ default: mod.GamesList })), {
+  ssr: false,
+  loading: () => null, // Show nothing while loading the component itself
+});
 
 const ReactQueryDevtools = lazy(() =>
   import('@tanstack/react-query-devtools').then((mod) => ({
@@ -11,78 +20,76 @@ const ReactQueryDevtools = lazy(() =>
   }))
 );
 
-export default function ScoreboardPage() {
-  const [isMounted, setIsMounted] = useState(false);
-  
-  const [selectedDate, setSelectedDate] = useState<Date>(() => {
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    return now;
-  });
+// Create QueryClient singleton outside component to prevent recreation
+let queryClientInstance: QueryClient | null = null;
+let cacheRestored = false;
 
-  // Create QueryClient with useMemo to prevent recreation on re-renders
-  const queryClient = useMemo(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            staleTime: 5 * 60 * 1000,
-            gcTime: 10 * 60 * 1000,
-            retry: 1,
-            refetchOnWindowFocus: false,
-            refetchOnMount: false, // Don't refetch if data is fresh
-          },
+function getQueryClient() {
+  if (!queryClientInstance) {
+    queryClientInstance = new QueryClient({
+      defaultOptions: {
+        queries: {
+          staleTime: 5 * 60 * 1000,
+          gcTime: 10 * 60 * 1000,
+          retry: 1,
+          refetchOnWindowFocus: false,
+          refetchOnMount: false,
         },
-      }),
-    []
-  );
+      },
+    });
+  }
+  
+  // Restore cache only once on client-side
+  if (typeof window !== 'undefined' && !cacheRestored) {
+    restoreCache(queryClientInstance);
+    cacheRestored = true;
+  }
+  
+  return queryClientInstance;
+}
 
-  useEffect(() => {
-    setIsMounted(true);
-    
-    // #region agent log
-    // Debug: Check computed styles on html/body/main for background issues
-    const html = document.documentElement;
-    const body = document.body;
-    const main = document.querySelector('main');
-    const htmlStyles = window.getComputedStyle(html);
-    const bodyStyles = window.getComputedStyle(body);
-    const mainStyles = main ? window.getComputedStyle(main) : null;
-    
-    // H9: Check if our CSS fix was applied - background-color and overscroll-behavior
-    fetch('http://127.0.0.1:7246/ingest/3a122c6d-4057-4c84-9cd0-36657cf4fcbc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:useEffect',message:'Post-fix CSS check',data:{htmlBgColor:htmlStyles.backgroundColor,htmlBgImage:htmlStyles.backgroundImage,htmlOverscroll:htmlStyles.overscrollBehavior,bodyBgColor:bodyStyles.backgroundColor,bodyOverscroll:bodyStyles.overscrollBehavior,htmlClasses:html.className,bodyClasses:body.className},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'H9'})}).catch(()=>{});
-    
-    // H10: Check if Tailwind classes are overriding our CSS
-    const htmlHasGradientClass = html.className.includes('bg-gradient');
-    const bodyHasGradientClass = body.className.includes('bg-gradient');
-    fetch('http://127.0.0.1:7246/ingest/3a122c6d-4057-4c84-9cd0-36657cf4fcbc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:useEffect',message:'Tailwind class check',data:{htmlHasGradientClass,bodyHasGradientClass,htmlFullClass:html.className,bodyFullClass:body.className},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'H10'})}).catch(()=>{});
-    // #endregion
-    
+// Get initial date synchronously from localStorage
+function getInitialDate(): Date {
+  if (typeof window !== 'undefined') {
     try {
       const stored = window.localStorage.getItem('nba-scoreboard-selected-date');
       if (stored) {
-        setSelectedDate(new Date(JSON.parse(stored)));
-      } else {
-        setSelectedDate(new Date());
+        return new Date(JSON.parse(stored));
       }
-    } catch (error) {
-      console.warn('Failed to restore date from localStorage:', error);
-      setSelectedDate(new Date());
+    } catch {
+      // Ignore errors, fall through to default
     }
-  }, []);
+  }
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  return now;
+}
+
+export default function ScoreboardPage() {
+  const [selectedDate, setSelectedDate] = useState<Date>(getInitialDate);
+  const queryClient = getQueryClient();
 
   useEffect(() => {
-    if (isMounted) {
-      try {
-        window.localStorage.setItem(
-          'nba-scoreboard-selected-date',
-          JSON.stringify(selectedDate.toISOString())
-        );
-      } catch (error) {
-        console.warn('Failed to save date to localStorage:', error);
-      }
+    const persistInterval = setInterval(() => {
+      persistCache(queryClient);
+    }, 10000);
+
+    return () => {
+      clearInterval(persistInterval);
+      persistCache(queryClient);
+    };
+  }, [queryClient]);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        'nba-scoreboard-selected-date',
+        JSON.stringify(selectedDate.toISOString())
+      );
+    } catch (error) {
+      console.warn('Failed to save date to localStorage:', error);
     }
-  }, [selectedDate, isMounted]);
+  }, [selectedDate]);
 
   return (
     <QueryClientProvider client={queryClient}>

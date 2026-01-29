@@ -20,7 +20,32 @@ export function GamesList({ selectedDate }: GamesListProps) {
     return <ErrorAlert error={error as any} onRetry={() => refetch()} />;
   }
 
-  // Only show loading when there's no data yet (initial load)
+  // If we have data (from cache or fetch), show it immediately
+  if (data && data.length > 0) {
+    return (
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <AnimatePresence mode="popLayout">
+          {data.map((game, index) => (
+            <motion.div
+              key={game.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{
+                duration: 0.3,
+                delay: index * 0.05,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+            >
+              <GameCard game={game} priority={index < 3} />
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+    );
+  }
+
+  // Show loading only when no data exists
   if (isLoading) {
     return (
       <div 
@@ -34,29 +59,6 @@ export function GamesList({ selectedDate }: GamesListProps) {
     );
   }
 
-  if (!data || data.length === 0) {
-    return <EmptyState date={selectedDate} />;
-  }
-
-  return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      <AnimatePresence mode="popLayout">
-        {data.map((game, index) => (
-          <motion.div
-            key={game.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{
-              duration: 0.3,
-              delay: index * 0.05,
-              ease: [0.22, 1, 0.36, 1],
-            }}
-          >
-            <GameCard game={game} priority={index < 3} />
-          </motion.div>
-        ))}
-      </AnimatePresence>
-    </div>
-  );
+  // No data and not loading = empty state
+  return <EmptyState date={selectedDate} />;
 }
