@@ -1,19 +1,16 @@
 @import 'tailwindcss';
 
-/* NBA Theme Colors */
 :root {
-  --nba-blue-primary: 219 91% 14%;      /* #041E42 */
-  --nba-blue-accent: 219 91% 24%;       /* #0652A0 */
-  --nba-red-accent: 0 100% 47%;         /* #EF0037 */
-  --nba-orange: 22 100% 50%;            /* #FF6600 */
-  --nba-court-wood: 32 28% 45%;         /* #9B7653 */
+  --nba-blue-primary: 219 91% 14%;
+  --nba-blue-accent: 219 91% 24%;
+  --nba-red-accent: 0 100% 47%;
+  --nba-orange: 22 100% 50%;
+  --nba-court-wood: 32 28% 45%;
   
-  /* Typography - Font Family Variables */
   --font-heading: var(--font-barlow);
   --font-body: var(--font-inter);
   --font-sans: var(--font-inter);
   
-  /* Base theme */
   --background: 0 0% 100%;
   --foreground: 222.2 84% 4.9%;
   --card: 0 0% 100%;
@@ -36,7 +33,6 @@
   --radius: 0.5rem;
 }
 
-/* Dark theme optimization */
 .dark {
   --background: var(--nba-blue-primary);
   --foreground: 0 0% 98%;
@@ -59,7 +55,6 @@
   --ring: 212.7 26.8% 83.9%;
 }
 
-/* Base styles */
 * {
   border-color: hsl(var(--border));
 }
@@ -75,7 +70,6 @@ body {
   overflow-x: hidden;
 }
 
-/* Custom animations */
 @keyframes pulse-glow {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.6; }
@@ -85,7 +79,6 @@ body {
   animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Typography utility classes */
 .font-heading {
   font-family: var(--font-heading);
   font-weight: 700;
@@ -134,7 +127,6 @@ textarea {
   cursor: text;
 }
 
-/* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -146,7 +138,6 @@ textarea {
   }
 }
 
-/* Screen reader only utility */
 .sr-only {
   position: absolute;
   width: 1px;

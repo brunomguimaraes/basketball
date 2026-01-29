@@ -1,9 +1,5 @@
 'use client';
 
-/**
- * Fallback component for when team logo fails to load
- * Displays team abbreviation in a styled circle
- */
 interface TeamLogoFallbackProps {
   abbreviation: string;
 }

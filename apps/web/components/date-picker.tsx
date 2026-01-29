@@ -8,6 +8,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@repo/ui/popover';
+import { Button } from '@repo/ui/button';
 import { cn } from '@repo/ui/utils';
 import { formatDateDisplay } from '@/lib/utils/date-formatters';
 
@@ -19,24 +20,34 @@ interface DatePickerProps {
 export function DatePicker({ selected, onSelect }: DatePickerProps) {
   const [open, setOpen] = useState(false);
 
+  const handleTodayClick = () => {
+    onSelect(new Date());
+  };
+
+  const isToday = (date: Date) => {
+    const today = new Date();
+    return date.toDateString() === today.toDateString();
+  };
+
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger
-        aria-label="Select date to view NBA games"
-        aria-expanded={open}
-        aria-haspopup="dialog"
-        className={cn(
-          'inline-flex items-center justify-start text-left font-normal',
-          'h-10 gap-1.5 px-3 rounded-md border text-sm',
-          'bg-white/10 border-white/20 text-white hover:bg-white/20',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50',
-          'disabled:pointer-events-none disabled:opacity-50',
-          'transition-colors cursor-pointer'
-        )}
-      >
-        <CalendarIcon className="mr-2 w-4 h-4" />
-        {formatDateDisplay(selected)}
-      </PopoverTrigger>
+    <div className="flex items-center gap-2">
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger
+          aria-label="Select date to view NBA games"
+          aria-expanded={open}
+          aria-haspopup="dialog"
+          className={cn(
+            'inline-flex items-center justify-start text-left font-normal',
+            'h-10 gap-1.5 px-3 rounded-md border text-sm',
+            'bg-white/10 border-white/20 text-white hover:bg-white/20',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50',
+            'disabled:pointer-events-none disabled:opacity-50',
+            'transition-colors cursor-pointer'
+          )}
+        >
+          <CalendarIcon className="mr-2 w-4 h-4" />
+          {formatDateDisplay(selected)}
+        </PopoverTrigger>
       <PopoverContent 
         className="w-auto p-3 !bg-slate-900 border-slate-700 shadow-2xl" 
         align="start"
@@ -59,5 +70,21 @@ export function DatePicker({ selected, onSelect }: DatePickerProps) {
         </div>
       </PopoverContent>
     </Popover>
+    
+    <Button
+      onClick={handleTodayClick}
+      disabled={isToday(selected)}
+      className={cn(
+        'h-10 px-4 rounded-md border text-sm font-medium',
+        'bg-white/10 border-white/20 text-white hover:bg-white/20',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50',
+        'disabled:opacity-50 disabled:cursor-not-allowed',
+        'transition-colors'
+      )}
+      aria-label="Jump to today's date"
+    >
+      Today
+    </Button>
+  </div>
   );
 }

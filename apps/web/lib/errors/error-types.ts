@@ -1,6 +1,3 @@
-/**
- * Error categories for centralized error handling
- */
 export enum ErrorCategory {
   NETWORK = 'NETWORK',
   RATE_LIMIT = 'RATE_LIMIT',
@@ -10,9 +7,6 @@ export enum ErrorCategory {
   UNKNOWN = 'UNKNOWN',
 }
 
-/**
- * Application error interface extending native Error
- */
 export interface AppError extends Error {
   category: ErrorCategory;
   userMessage: string;
@@ -21,9 +15,6 @@ export interface AppError extends Error {
   originalError?: Error;
 }
 
-/**
- * User-friendly error messages mapped to error categories
- */
 export const ERROR_MESSAGES: Record<ErrorCategory, string> = {
   [ErrorCategory.NETWORK]:
     'Unable to connect. Please check your internet connection and try again.',

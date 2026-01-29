@@ -1,8 +1,3 @@
-/**
- * BallDontLie API Response Types
- * Reference: https://docs.balldontlie.io/#nba-api
- */
-
 export interface Team {
   id: number;
   abbreviation: string;
@@ -21,9 +16,9 @@ export interface PeriodScore {
 
 export interface Game {
   id: number;
-  date: string; // ISO 8601 format
+  date: string;
   season: number;
-  status: 'Final' | 'In Progress' | 'Scheduled';
+  status: string;
   period: number;
   time: string;
   postseason: boolean;
@@ -45,21 +40,12 @@ export interface GamesResponse {
   };
 }
 
-/**
- * API Request Parameters
- */
 export interface FetchGamesParams {
-  dates: string[]; // YYYY-MM-DD format
+  dates: string[];
 }
 
-/**
- * React Query Types
- */
-export type GamesQueryKey = ['games', string]; // ['games', '2024-01-15']
+export type GamesQueryKey = ['games', string];
 
-/**
- * Error Types (from error abstraction layer)
- */
 export enum ErrorCategory {
   NETWORK = 'NETWORK',
   RATE_LIMIT = 'RATE_LIMIT',
@@ -75,4 +61,35 @@ export interface AppError extends Error {
   statusCode?: number;
   retryable: boolean;
   originalError?: Error;
+}
+
+export interface Player {
+  id: number;
+  first_name: string;
+  last_name: string;
+  position: string;
+  height: string;
+  weight: string;
+  jersey_number: string;
+  college: string;
+  country: string;
+  draft_year: number | null;
+  draft_round: number | null;
+  draft_number: number | null;
+  team: Team;
+}
+
+export interface PlayersResponse {
+  data: Player[];
+  meta: {
+    total_pages: number;
+    current_page: number;
+    next_page: number | null;
+    per_page: number;
+    total_count: number;
+  };
+}
+
+export interface FetchRosterParams {
+  teamId: number;
 }

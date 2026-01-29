@@ -72,7 +72,7 @@ describe('fetchGames API service', () => {
     await fetchGames({ dates: ['2024-01-15'] });
 
     expect(global.fetch).toHaveBeenCalledWith(
-      expect.stringContaining('dates%5B%5D=2024-01-15'), // URL encoded []
+      expect.stringContaining('dates%5B%5D=2024-01-15'),
       expect.objectContaining({
         headers: {
           Authorization: 'test-api-key',
@@ -90,11 +90,11 @@ describe('fetchGames API service', () => {
     await fetchGames({ dates: ['2024-01-15', '2024-01-16'] });
 
     expect(global.fetch).toHaveBeenCalledWith(
-      expect.stringContaining('dates%5B%5D=2024-01-15'), // URL encoded []
+      expect.stringContaining('dates%5B%5D=2024-01-15'),
       expect.any(Object)
     );
     expect(global.fetch).toHaveBeenCalledWith(
-      expect.stringContaining('dates%5B%5D=2024-01-16'), // URL encoded []
+      expect.stringContaining('dates%5B%5D=2024-01-16'),
       expect.any(Object)
     );
   });
@@ -141,7 +141,6 @@ describe('fetchGames API service', () => {
   });
 
   it('should throw error if API key is not configured', async () => {
-    // Temporarily clear the API key
     const originalEnv = process.env.NEXT_PUBLIC_BALLDONTLIE_API_KEY;
     delete process.env.NEXT_PUBLIC_BALLDONTLIE_API_KEY;
 
@@ -149,11 +148,9 @@ describe('fetchGames API service', () => {
       await fetchGames({ dates: ['2024-01-15'] });
       expect.fail('Should have thrown an error');
     } catch (error: any) {
-      // Should throw an error (either the API key error or a TypeError)
       expect(error).toBeDefined();
       expect(error.message).toBeDefined();
     } finally {
-      // Restore API key
       process.env.NEXT_PUBLIC_BALLDONTLIE_API_KEY = originalEnv;
     }
   });

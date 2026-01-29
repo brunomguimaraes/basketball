@@ -21,7 +21,6 @@ export function TeamScore({ team, score, isWinner, priority = false }: TeamScore
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-3">
-        {/* Team Logo */}
         {branding && !imageError ? (
           <Image
             src={branding.logoUrl}
@@ -37,7 +36,6 @@ export function TeamScore({ team, score, isWinner, priority = false }: TeamScore
           <TeamLogoFallback abbreviation={team.abbreviation} />
         )}
         
-        {/* Team Name */}
         <div className="flex flex-col">
           <span
             className="font-team-name text-xl"
@@ -62,7 +60,6 @@ export function TeamScore({ team, score, isWinner, priority = false }: TeamScore
         </div>
       </div>
       
-      {/* Score */}
       <div
         className={cn(
           'font-score text-3xl',

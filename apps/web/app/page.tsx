@@ -5,19 +5,17 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DatePicker } from '@/components/date-picker';
 import { GamesList } from '@/components/games-list';
 
-// Lazy load React Query devtools only in development
 const ReactQueryDevtools = lazy(() =>
   import('@tanstack/react-query-devtools').then((mod) => ({
     default: mod.ReactQueryDevtools,
   }))
 );
 
-// Create QueryClient with proper configuration
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes default
-      gcTime: 10 * 60 * 1000, // 10 minutes garbage collection
+      staleTime: 5 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
       retry: 1,
       refetchOnWindowFocus: false,
     },
@@ -25,19 +23,14 @@ const queryClient = new QueryClient({
 });
 
 export default function ScoreboardPage() {
-  // Track if component has mounted to avoid hydration mismatch
   const [isMounted, setIsMounted] = useState(false);
   
-  // Initialize with a stable date for SSR
   const [selectedDate, setSelectedDate] = useState<Date>(() => {
-    // Use a stable date during SSR to prevent hydration mismatch
-    // Will be updated after mount to use localStorage or current date
     const now = new Date();
-    now.setHours(0, 0, 0, 0); // Normalize to midnight for consistency
+    now.setHours(0, 0, 0, 0);
     return now;
   });
 
-  // After mount, update with actual date from localStorage or today
   useEffect(() => {
     setIsMounted(true);
     
@@ -46,7 +39,6 @@ export default function ScoreboardPage() {
       if (stored) {
         setSelectedDate(new Date(JSON.parse(stored)));
       } else {
-        // Set to actual current date
         setSelectedDate(new Date());
       }
     } catch (error) {
@@ -55,7 +47,6 @@ export default function ScoreboardPage() {
     }
   }, []);
 
-  // Save to localStorage when date changes
   useEffect(() => {
     if (isMounted) {
       try {
@@ -80,7 +71,6 @@ export default function ScoreboardPage() {
             >
               NBA Scoreboard
             </h1>
-            {/* Suppress hydration warning for date picker since we intentionally update after mount */}
             <div suppressHydrationWarning>
               <DatePicker
                 selected={selectedDate}

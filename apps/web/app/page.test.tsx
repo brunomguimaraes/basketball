@@ -5,7 +5,6 @@ import ScoreboardPage from './page';
 import * as api from '@/services/nba/api';
 import type { GamesResponse, Game } from '@/services/nba/types';
 
-// Mock localStorage
 const localStorageMock = (() => {
   let store: Record<string, string> = {};
 
@@ -23,13 +22,11 @@ const localStorageMock = (() => {
   };
 })();
 
-// Replace global localStorage
 Object.defineProperty(window, 'localStorage', {
   value: localStorageMock,
   writable: true,
 });
 
-// Mock game data
 const mockGame: Game = {
   id: 1,
   date: '2024-01-15T19:00:00.000Z',
@@ -94,9 +91,7 @@ describe('ScoreboardPage Integration', () => {
 
     expect(screen.getByText('NBA Scoreboard')).toBeInTheDocument();
     
-    // Date picker should be present (look for calendar icon or formatted date)
     await waitFor(() => {
-      // The date picker shows a formatted date like "January 28th, 2026"
       const datePattern = /\w+ \d{1,2}(st|nd|rd|th)?, \d{4}/;
       expect(screen.getByText(datePattern)).toBeInTheDocument();
     });
@@ -118,7 +113,6 @@ describe('ScoreboardPage Integration', () => {
 
     render(<ScoreboardPage />);
 
-    // Verify component mounts successfully
     expect(screen.getByText('NBA Scoreboard')).toBeInTheDocument();
   });
 

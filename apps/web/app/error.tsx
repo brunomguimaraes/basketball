@@ -11,7 +11,6 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Log error to console in development
     console.error('Route error:', error);
   }, [error]);
 

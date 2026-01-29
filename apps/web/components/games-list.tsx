@@ -16,12 +16,10 @@ export function GamesList({ selectedDate }: GamesListProps) {
   const dateString = format(selectedDate, 'yyyy-MM-dd');
   const { data, isLoading, error, refetch } = useGames(dateString);
 
-  // Error state
   if (error) {
     return <ErrorAlert error={error as any} onRetry={() => refetch()} />;
   }
 
-  // Loading state - show 6 skeleton cards
   if (isLoading) {
     return (
       <div 
@@ -37,12 +35,10 @@ export function GamesList({ selectedDate }: GamesListProps) {
     );
   }
 
-  // Empty state
   if (!data || data.length === 0) {
     return <EmptyState date={selectedDate} />;
   }
 
-  // Games display with stagger animation
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       <AnimatePresence mode="popLayout">
@@ -55,7 +51,7 @@ export function GamesList({ selectedDate }: GamesListProps) {
             transition={{
               duration: 0.3,
               delay: index * 0.05,
-              ease: [0.22, 1, 0.36, 1], // Energetic easing
+              ease: [0.22, 1, 0.36, 1],
             }}
           >
             <GameCard game={game} priority={index < 3} />

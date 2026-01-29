@@ -1,22 +1,12 @@
-/**
- * NBA Team Branding Data
- * Static mapping of team logos and colors for all 30 NBA teams
- * Using official NBA CDN for logo URLs
- */
-
 export interface TeamBranding {
   id: number;
   abbreviation: string;
   name: string;
-  primaryColor: string; // Hex color
-  secondaryColor: string; // Hex color
-  logoUrl: string; // CDN URL
+  primaryColor: string;
+  secondaryColor: string;
+  logoUrl: string;
 }
 
-/**
- * Complete NBA team branding mapping
- * All 30 teams with official colors and CDN logo URLs
- */
 export const TEAM_BRANDING: Record<string, TeamBranding> = {
   ATL: {
     id: 1,
@@ -260,27 +250,14 @@ export const TEAM_BRANDING: Record<string, TeamBranding> = {
   },
 };
 
-/**
- * Get team branding by abbreviation
- * @param abbreviation - Team abbreviation (e.g., 'LAL', 'BOS')
- * @returns TeamBranding object or null if not found
- */
 export function getTeamBranding(abbreviation: string): TeamBranding | null {
   return TEAM_BRANDING[abbreviation] || null;
 }
 
-/**
- * Get all team abbreviations
- * Useful for testing and validation
- */
 export function getAllTeamAbbreviations(): string[] {
   return Object.keys(TEAM_BRANDING);
 }
 
-/**
- * Validate team branding data completeness
- * Returns true if all 30 teams are present
- */
 export function validateTeamBrandingData(): boolean {
   const expectedTeamCount = 30;
   const actualTeamCount = Object.keys(TEAM_BRANDING).length;

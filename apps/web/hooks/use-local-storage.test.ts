@@ -4,7 +4,6 @@ import { useLocalStorage } from './use-local-storage';
 
 describe('useLocalStorage hook', () => {
   beforeEach(() => {
-    // Clear localStorage before each test
     localStorage.clear();
     vi.clearAllMocks();
   });
@@ -31,7 +30,6 @@ describe('useLocalStorage hook', () => {
   });
 
   it('should restore value from localStorage', () => {
-    // Set value in localStorage first
     localStorage.setItem('test-key', JSON.stringify('stored-value'));
 
     const { result } = renderHook(() =>
@@ -93,10 +91,8 @@ describe('useLocalStorage hook', () => {
   });
 
   it('should handle JSON parse errors gracefully', () => {
-    // Set invalid JSON in localStorage
     localStorage.setItem('test-key', '{invalid json}');
 
-    // Mock console.warn to suppress warning in tests
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     const { result } = renderHook(() =>
@@ -110,8 +106,6 @@ describe('useLocalStorage hook', () => {
   });
 
   it('should handle SSR (window undefined) gracefully', () => {
-    // This test assumes SSR safety is built-in
-    // In actual SSR, window would be undefined
     const { result } = renderHook(() =>
       useLocalStorage('test-key', 'default-value')
     );
@@ -124,12 +118,10 @@ describe('useLocalStorage hook', () => {
       useLocalStorage('shared-key', 'value1')
     );
 
-    // Set value with first hook
     act(() => {
       result1.current[1]('shared-value');
     });
 
-    // Second hook should read the stored value
     const { result: result2 } = renderHook(() =>
       useLocalStorage('shared-key', 'value2')
     );
@@ -138,37 +130,30 @@ describe('useLocalStorage hook', () => {
   });
 
   it('should handle localStorage setItem errors', () => {
-    // Skip this test - implementation handles errors gracefully
-    // In real app, console.warn is called which is fine for production
     expect(true).toBe(true);
   });
 
   it('should work with different data types', () => {
-    // String
     const { result: stringResult } = renderHook(() =>
       useLocalStorage('string-key', 'test')
     );
     expect(stringResult.current[0]).toBe('test');
 
-    // Number
     const { result: numberResult } = renderHook(() =>
       useLocalStorage('number-key', 42)
     );
     expect(numberResult.current[0]).toBe(42);
 
-    // Boolean
     const { result: boolResult } = renderHook(() =>
       useLocalStorage('bool-key', true)
     );
     expect(boolResult.current[0]).toBe(true);
 
-    // Array
     const { result: arrayResult } = renderHook(() =>
       useLocalStorage('array-key', [1, 2, 3])
     );
     expect(arrayResult.current[0]).toEqual([1, 2, 3]);
 
-    // Object
     const { result: objectResult } = renderHook(() =>
       useLocalStorage('object-key', { a: 1, b: 2 })
     );
