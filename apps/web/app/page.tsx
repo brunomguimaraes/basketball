@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, lazy, Suspense, useMemo } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DatePicker } from '@/components/date-picker';
 import { GamesList } from '@/components/games-list';
@@ -11,17 +11,6 @@ const ReactQueryDevtools = lazy(() =>
   }))
 );
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000,
-      gcTime: 10 * 60 * 1000,
-      retry: 1,
-      refetchOnWindowFocus: false,
-    },
-  },
-});
-
 export default function ScoreboardPage() {
   const [isMounted, setIsMounted] = useState(false);
   
@@ -30,6 +19,23 @@ export default function ScoreboardPage() {
     now.setHours(0, 0, 0, 0);
     return now;
   });
+
+  // Create QueryClient with useMemo to prevent recreation on re-renders
+  const queryClient = useMemo(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 5 * 60 * 1000,
+            gcTime: 10 * 60 * 1000,
+            retry: 1,
+            refetchOnWindowFocus: false,
+            refetchOnMount: false, // Don't refetch if data is fresh
+          },
+        },
+      }),
+    []
+  );
 
   useEffect(() => {
     setIsMounted(true);

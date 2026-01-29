@@ -14,14 +14,14 @@ interface GamesListProps {
 
 export function GamesList({ selectedDate }: GamesListProps) {
   const dateString = format(selectedDate, 'yyyy-MM-dd');
-  const { data, isFetching, error, refetch } = useGames(dateString);
+  const { data, isLoading, error, refetch } = useGames(dateString);
 
   if (error) {
     return <ErrorAlert error={error as any} onRetry={() => refetch()} />;
   }
 
-  // Only show loading when fetching AND no cached data exists
-  if (isFetching && !data) {
+  // Only show loading when there's no data yet (initial load)
+  if (isLoading) {
     return (
       <div 
         className="flex items-center justify-center min-h-[400px]"
