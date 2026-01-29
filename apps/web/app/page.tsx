@@ -34,6 +34,24 @@ export default function ScoreboardPage() {
   useEffect(() => {
     setIsMounted(true);
     
+    // #region agent log
+    // Debug: Check computed styles on html/body/main for background issues
+    const html = document.documentElement;
+    const body = document.body;
+    const main = document.querySelector('main');
+    const htmlStyles = window.getComputedStyle(html);
+    const bodyStyles = window.getComputedStyle(body);
+    const mainStyles = main ? window.getComputedStyle(main) : null;
+    
+    // H9: Check if our CSS fix was applied - background-color and overscroll-behavior
+    fetch('http://127.0.0.1:7246/ingest/3a122c6d-4057-4c84-9cd0-36657cf4fcbc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:useEffect',message:'Post-fix CSS check',data:{htmlBgColor:htmlStyles.backgroundColor,htmlBgImage:htmlStyles.backgroundImage,htmlOverscroll:htmlStyles.overscrollBehavior,bodyBgColor:bodyStyles.backgroundColor,bodyOverscroll:bodyStyles.overscrollBehavior,htmlClasses:html.className,bodyClasses:body.className},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'H9'})}).catch(()=>{});
+    
+    // H10: Check if Tailwind classes are overriding our CSS
+    const htmlHasGradientClass = html.className.includes('bg-gradient');
+    const bodyHasGradientClass = body.className.includes('bg-gradient');
+    fetch('http://127.0.0.1:7246/ingest/3a122c6d-4057-4c84-9cd0-36657cf4fcbc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:useEffect',message:'Tailwind class check',data:{htmlHasGradientClass,bodyHasGradientClass,htmlFullClass:html.className,bodyFullClass:body.className},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'H10'})}).catch(()=>{});
+    // #endregion
+    
     try {
       const stored = window.localStorage.getItem('nba-scoreboard-selected-date');
       if (stored) {

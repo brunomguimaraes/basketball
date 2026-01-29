@@ -34,8 +34,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${inter.variable} ${barlowCondensed.variable} font-sans antialiased`}>
+    <html lang="en" className="bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900">
+      <body className={`${inter.variable} ${barlowCondensed.variable} font-sans antialiased bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900`}>
         {children}
       </body>
     </html>

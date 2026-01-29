@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGames } from '@/services/nba/hooks';
 import { GameCard } from './game-card';
-import { GameCardSkeleton } from './game-card-skeleton';
+import { BouncingBasketball } from './bouncing-basketball';
 import { EmptyState } from './empty-state';
 import { ErrorAlert } from './error-alert';
 
@@ -14,23 +14,22 @@ interface GamesListProps {
 
 export function GamesList({ selectedDate }: GamesListProps) {
   const dateString = format(selectedDate, 'yyyy-MM-dd');
-  const { data, isLoading, error, refetch } = useGames(dateString);
+  const { data, isFetching, error, refetch } = useGames(dateString);
 
   if (error) {
     return <ErrorAlert error={error as any} onRetry={() => refetch()} />;
   }
 
-  if (isLoading) {
+  // Only show loading when fetching AND no cached data exists
+  if (isFetching && !data) {
     return (
       <div 
-        className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+        className="flex items-center justify-center min-h-[400px]"
         role="status"
         aria-live="polite"
         aria-label="Loading games"
       >
-        {[...Array(6)].map((_, i) => (
-          <GameCardSkeleton key={i} />
-        ))}
+        <BouncingBasketball size={80} />
       </div>
     );
   }
