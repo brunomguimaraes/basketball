@@ -7,37 +7,48 @@ import { useState, useEffect, useCallback } from 'react';
  * Handles SSR edge cases and provides type-safe storage
  * 
  * @param key - localStorage key
- * @param initialValue - Default value if no stored value exists
+ * @param initialValue - Default value if no stored value exists (can be a function for lazy initialization)
  * @returns Tuple of [storedValue, setValue] similar to useState
  * 
  * @example
  * ```typescript
  * const [selectedDate, setSelectedDate] = useLocalStorage(
  *   'nba-scoreboard-selected-date',
- *   new Date()
+ *   () => new Date()
  * );
  * ```
  */
 export function useLocalStorage<T>(
   key: string,
-  initialValue: T
+  initialValue: T | (() => T)
 ): [T, (value: T | ((prevValue: T) => T)) => void] {
   // Initialize state with SSR safety
   const [storedValue, setStoredValue] = useState<T>(() => {
-    // Return initial value during SSR
+    // Return initial value during SSR (avoid calling function to prevent hydration mismatch)
     if (typeof window === 'undefined') {
-      return initialValue;
+      return initialValue instanceof Function ? initialValue() : initialValue;
     }
 
     try {
       const item = window.localStorage.getItem(key);
-      // Parse stored json or return initialValue if null
-      return item ? JSON.parse(item) : initialValue;
+      if (item) {
+        // Parse stored value
+        return JSON.parse(item);
+      }
+      // No stored value, use initial value
+      return initialValue instanceof Function ? initialValue() : initialValue;
     } catch (error) {
       console.warn(`Error reading localStorage key "${key}":`, error);
-      return initialValue;
+      return initialValue instanceof Function ? initialValue() : initialValue;
     }
   });
+
+  // Hydration fix: sync state with localStorage after mount
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   // Memoized setter function
   const setValue = useCallback(

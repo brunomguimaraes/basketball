@@ -5,7 +5,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Demo"
+  title: "NBA Scoreboard",
+  description: "View NBA game scores and schedules for any date. Built with Next.js, React 19, and TypeScript.",
 };
 
 export default function RootLayout({

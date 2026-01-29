@@ -1,4 +1,5 @@
-import { handleApiError } from '@/lib/errors/error-handler';
+import { handleApiError, createAppError } from '@/lib/errors/error-handler';
+import { ErrorCategory } from '@/lib/errors/error-types';
 import type { GamesResponse, FetchGamesParams } from './types';
 
 const API_BASE_URL = 'https://api.balldontlie.io/v1';
@@ -21,7 +22,16 @@ export async function fetchGames(
   params: FetchGamesParams
 ): Promise<GamesResponse> {
   if (!API_KEY) {
-    throw new Error('API key not configured. Please set NEXT_PUBLIC_BALLDONTLIE_API_KEY in .env.local');
+    console.error(
+      '❌ API key not configured!\n' +
+      'Please create apps/web/.env.local with:\n' +
+      'NEXT_PUBLIC_BALLDONTLIE_API_KEY=your_api_key_here\n\n' +
+      'Get your free API key at: https://app.balldontlie.io/signup'
+    );
+    throw createAppError(
+      ErrorCategory.AUTHENTICATION,
+      new Error('API key not configured')
+    );
   }
 
   try {
