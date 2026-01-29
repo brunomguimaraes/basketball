@@ -16,20 +16,20 @@ export function TeamScore({ team, score, isWinner }: TeamScoreProps) {
         <div className="flex flex-col">
           <span
             className={cn(
-              'text-base font-semibold',
+              'font-team-name text-lg',
               isWinner ? 'text-white' : 'text-white/70'
             )}
           >
             {team.full_name}
           </span>
-          <span className="text-xs text-white/50">
+          <span className="text-xs text-white/50 font-medium tracking-wide">
             {team.abbreviation}
           </span>
         </div>
       </div>
       <div
         className={cn(
-          'text-2xl font-bold',
+          'font-score text-3xl',
           isWinner ? 'text-white' : 'text-white/70'
         )}
       >

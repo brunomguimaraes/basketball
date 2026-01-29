@@ -8,6 +8,11 @@
   --nba-orange: 22 100% 50%;            /* #FF6600 */
   --nba-court-wood: 32 28% 45%;         /* #9B7653 */
   
+  /* Typography - Font Family Variables */
+  --font-heading: var(--font-barlow);
+  --font-body: var(--font-inter);
+  --font-sans: var(--font-inter);
+  
   /* Base theme */
   --background: 0 0% 100%;
   --foreground: 222.2 84% 4.9%;
@@ -80,12 +85,35 @@ body {
   animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
+/* Typography utility classes */
+.font-heading {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.font-score {
+  font-family: var(--font-barlow);
+  font-weight: 800;
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.font-team-name {
+  font-family: var(--font-barlow);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-  * {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 

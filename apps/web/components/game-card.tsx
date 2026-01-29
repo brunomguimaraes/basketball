@@ -2,7 +2,6 @@
 
 import { memo } from 'react';
 import { motion } from 'framer-motion';
-import { format } from 'date-fns';
 import {
   Card,
   CardHeader,
@@ -13,6 +12,7 @@ import { Badge } from '@repo/ui/badge';
 import type { Game } from '@/services/nba/types';
 import { TeamScore } from './team-score';
 import { QuarterScores } from './quarter-scores';
+import { formatGameTime } from '@/lib/utils/date-formatters';
 
 interface GameCardProps {
   game: Game;
@@ -45,8 +45,8 @@ function GameCardComponent({ game }: GameCardProps) {
       >
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-white text-lg">
-              {format(new Date(game.date), 'h:mm a')}
+            <CardTitle className="text-white text-base font-normal">
+              {formatGameTime(game.date)}
             </CardTitle>
             <Badge className={statusColor}>{game.status}</Badge>
           </div>

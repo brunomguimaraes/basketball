@@ -75,7 +75,7 @@ export default function ScoreboardPage() {
         <div className="container mx-auto px-4 py-8 max-w-7xl">
           <header className="mb-8">
             <h1 
-              className="text-4xl font-bold text-white mb-4"
+              className="font-heading text-5xl md:text-6xl font-bold text-white mb-4 tracking-tight"
               id="page-title"
             >
               NBA Scoreboard

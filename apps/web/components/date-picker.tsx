@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { format } from 'date-fns';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { Calendar } from '@repo/ui/calendar';
 import {
@@ -10,6 +9,7 @@ import {
   PopoverTrigger,
 } from '@repo/ui/popover';
 import { cn } from '@repo/ui/utils';
+import { formatDateDisplay } from '@/lib/utils/date-formatters';
 
 interface DatePickerProps {
   selected: Date;
@@ -27,14 +27,15 @@ export function DatePicker({ selected, onSelect }: DatePickerProps) {
         aria-haspopup="dialog"
         className={cn(
           'inline-flex items-center justify-start text-left font-normal',
-          'h-9 gap-1.5 px-2.5 rounded-md border text-sm',
+          'h-10 gap-1.5 px-3 rounded-md border text-sm',
           'bg-white/10 border-white/20 text-white hover:bg-white/20',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50',
-          'disabled:pointer-events-none disabled:opacity-50'
+          'disabled:pointer-events-none disabled:opacity-50',
+          'transition-colors'
         )}
       >
         <CalendarIcon className="mr-2 w-4 h-4" />
-        {format(selected, 'PPP')}
+        {formatDateDisplay(selected)}
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar
