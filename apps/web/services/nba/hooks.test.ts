@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useGames } from './hooks';
+import { useGames, useTeamRoster } from './hooks';
 import * as api from './api';
+import * as rosterApi from './roster-api';
 import { ErrorCategory } from './types';
 import { createElement, type ReactNode } from 'react';
 
@@ -242,5 +243,160 @@ describe('useGames React Query hook', () => {
 
     // Query key should be ['games', dateString]
     expect(api.fetchGames).toHaveBeenCalledWith({ dates: ['2024-01-15'] });
+  });
+});
+
+describe('useTeamRoster React Query hook', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should NOT fetch when enabled=false (lazy loading)', async () => {
+    const fetchSpy = vi.spyOn(rosterApi, 'fetchTeamRoster');
+
+    const { result } = renderHook(() => useTeamRoster(1, false), {
+      wrapper: createWrapper(),
+    });
+
+    // Should not trigger fetch
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.data).toBeUndefined();
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('should fetch when enabled=true', async () => {
+    const mockPlayers = [
+      {
+        id: 1,
+        first_name: 'LeBron',
+        last_name: 'James',
+        position: 'F',
+        height: '6-9',
+        weight: '250',
+        jersey_number: '23',
+        college: 'None',
+        country: 'USA',
+        draft_year: 2003,
+        draft_round: 1,
+        draft_number: 1,
+        team: {
+          id: 1,
+          name: 'Lakers',
+          abbreviation: 'LAL',
+          city: 'Los Angeles',
+          conference: 'West',
+          division: 'Pacific',
+          full_name: 'Los Angeles Lakers',
+        },
+      },
+    ];
+
+    vi.spyOn(rosterApi, 'fetchTeamRoster').mockResolvedValue({
+      data: mockPlayers,
+      meta: {
+        total_pages: 1,
+        current_page: 1,
+        next_page: null,
+        per_page: 100,
+        total_count: 1,
+      },
+    });
+
+    const { result } = renderHook(() => useTeamRoster(1, true), {
+      wrapper: createWrapper(),
+    });
+
+    expect(result.current.isLoading).toBe(true);
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(result.current.data).toHaveLength(1);
+    expect(result.current.data?.[0]?.first_name).toBe('LeBron');
+    expect(result.current.data?.[0]?.last_name).toBe('James');
+  });
+
+  it('should use correct query key format', async () => {
+    vi.spyOn(rosterApi, 'fetchTeamRoster').mockResolvedValue({
+      data: [],
+      meta: {} as any,
+    });
+
+    const { result } = renderHook(() => useTeamRoster(5, true), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    // Query key should be ['roster', teamId]
+    expect(rosterApi.fetchTeamRoster).toHaveBeenCalledWith({ teamId: 5 });
+  });
+
+  it('should cache results for 24 hours (staleTime)', async () => {
+    const mockPlayers = [
+      {
+        id: 1,
+        first_name: 'Test',
+        last_name: 'Player',
+        position: 'G',
+        height: '6-3',
+        weight: '195',
+        jersey_number: '10',
+        college: 'Duke',
+        country: 'USA',
+        draft_year: 2020,
+        draft_round: 1,
+        draft_number: 5,
+        team: {} as any,
+      },
+    ];
+
+    vi.spyOn(rosterApi, 'fetchTeamRoster').mockResolvedValue({
+      data: mockPlayers,
+      meta: {} as any,
+    });
+
+    const { result } = renderHook(() => useTeamRoster(1, true), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(result.current.data).toEqual(mockPlayers);
+  });
+
+  it('should handle empty roster', async () => {
+    vi.spyOn(rosterApi, 'fetchTeamRoster').mockResolvedValue({
+      data: [],
+      meta: {
+        total_pages: 0,
+        current_page: 1,
+        next_page: null,
+        per_page: 100,
+        total_count: 0,
+      },
+    });
+
+    const { result } = renderHook(() => useTeamRoster(1, true), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(result.current.data).toHaveLength(0);
+  });
+
+  it('should handle API errors gracefully', async () => {
+    const error = new Error('API error') as any;
+    error.category = ErrorCategory.SERVER;
+
+    vi.spyOn(rosterApi, 'fetchTeamRoster').mockRejectedValue(error);
+
+    const { result } = renderHook(() => useTeamRoster(1, true), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+
+    expect(result.current.error).toBeDefined();
   });
 });

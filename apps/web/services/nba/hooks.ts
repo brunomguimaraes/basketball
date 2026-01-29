@@ -2,28 +2,10 @@
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import { fetchGames } from './api';
-import type { Game, GamesQueryKey } from './types';
+import { fetchTeamRoster } from './roster-api';
+import type { Game, GamesQueryKey, Player } from './types';
 import { ErrorCategory } from './types';
 
-/**
- * React Query hook for fetching NBA games by date
- * Implements intelligent caching strategy based on game status:
- * - Final games: 24 hours (immutable data)
- * - In Progress: 1 minute (live updates)
- * - Scheduled: 5 minutes (stable data)
- * - Empty results: 5 minutes (default)
- * 
- * @param dateString - Date in YYYY-MM-DD format
- * @returns UseQueryResult with games array and query state
- * 
- * @example
- * ```typescript
- * const { data, isLoading, error, refetch } = useGames('2024-01-15');
- * if (isLoading) return <Skeleton />;
- * if (error) return <ErrorAlert error={error} onRetry={refetch} />;
- * return data.map(game => <GameCard key={game.id} game={game} />);
- * ```
- */
 export function useGames(
   dateString: string
 ): UseQueryResult<Game[], Error> {
@@ -36,33 +18,59 @@ export function useGames(
     staleTime: (query) => {
       const games = query.state.data;
       if (!games || games.length === 0) {
-        return 5 * 60 * 1000; // 5 minutes for empty results
+        return 5 * 60 * 1000;
       }
 
-      // Check game statuses to determine cache duration
-      const hasInProgress = games.some((g) => g.status === 'In Progress');
-      const hasScheduled = games.some((g) => g.status === 'Scheduled');
+      const isInProgress = (status: string) => {
+        return status === 'In Progress' || 
+               status.includes('Qtr') || 
+               status.toLowerCase().includes('halftime') ||
+               status.toLowerCase().includes('ot');
+      };
+
+      const isScheduled = (status: string) => {
+        return status === 'Scheduled' || status.match(/^\d{4}-\d{2}-\d{2}T/);
+      };
+
+      const hasInProgress = games.some((g) => isInProgress(g.status));
+      const hasScheduled = games.some((g) => isScheduled(g.status));
       const allFinal = games.every((g) => g.status === 'Final');
 
       if (allFinal) {
-        return 24 * 60 * 60 * 1000; // 24 hours for completed games
+        return 24 * 60 * 60 * 1000;
       }
       if (hasInProgress) {
-        return 1 * 60 * 1000; // 1 minute for live games
+        return 1 * 60 * 1000;
       }
       if (hasScheduled) {
-        return 5 * 60 * 1000; // 5 minutes for scheduled games
+        return 5 * 60 * 1000;
       }
 
-      return 5 * 60 * 1000; // Default 5 minutes
+      return 5 * 60 * 1000;
     },
-    gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes after stale
+    gcTime: 30 * 60 * 1000,
     retry: (failureCount, error) => {
-      // Don't retry on rate limit or auth errors
       if ((error as any).category === ErrorCategory.RATE_LIMIT) return false;
       if ((error as any).category === ErrorCategory.AUTHENTICATION) return false;
       return failureCount < 2;
     },
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  });
+}
+
+export function useTeamRoster(
+  teamId: number,
+  enabled: boolean = false
+): UseQueryResult<Player[], Error> {
+  return useQuery<Player[], Error>({
+    queryKey: ['roster', teamId],
+    queryFn: async () => {
+      const response = await fetchTeamRoster({ teamId });
+      return response.data;
+    },
+    enabled,
+    staleTime: 24 * 60 * 60 * 1000,
+    gcTime: 7 * 24 * 60 * 60 * 1000,
+    retry: 1,
   });
 }

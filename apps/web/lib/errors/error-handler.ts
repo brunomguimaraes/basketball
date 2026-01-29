@@ -4,14 +4,6 @@ import {
   type AppError,
 } from './error-types';
 
-/**
- * Creates a typed AppError with proper categorization and user-friendly messaging
- * 
- * @param category - The error category for classification
- * @param originalError - The original error object (optional)
- * @param statusCode - HTTP status code if applicable (optional)
- * @returns AppError with all required properties
- */
 export function createAppError(
   category: ErrorCategory,
   originalError?: Error,
@@ -29,7 +21,6 @@ export function createAppError(
   ].includes(category);
   error.originalError = originalError;
 
-  // Log to console in development
   if (process.env.NODE_ENV === 'development') {
     console.error('[AppError]', {
       category,
@@ -42,16 +33,9 @@ export function createAppError(
   return error;
 }
 
-/**
- * Handles API response errors and categorizes them based on HTTP status codes
- * 
- * @param responseOrError - Response object, Error, or unknown error
- * @returns Promise<AppError> with proper categorization
- */
 export async function handleApiError(
   responseOrError: Response | Error | unknown
 ): Promise<AppError> {
-  // Handle fetch Response errors
   if (responseOrError instanceof Response) {
     const { status } = responseOrError;
 
@@ -74,16 +58,13 @@ export async function handleApiError(
     }
   }
 
-  // Handle network errors (fetch failures)
   if (responseOrError instanceof TypeError) {
     return createAppError(ErrorCategory.NETWORK, responseOrError);
   }
 
-  // Handle generic errors
   if (responseOrError instanceof Error) {
     return createAppError(ErrorCategory.UNKNOWN, responseOrError);
   }
 
-  // Unknown error type
   return createAppError(ErrorCategory.UNKNOWN);
 }
