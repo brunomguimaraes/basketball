@@ -13,12 +13,14 @@ import type { Game } from '@/services/nba/types';
 import { TeamScore } from './team-score';
 import { QuarterScores } from './quarter-scores';
 import { formatGameTime } from '@/lib/utils/date-formatters';
+import { getTeamBranding } from '@/lib/constants/team-branding';
 
 interface GameCardProps {
   game: Game;
+  priority?: boolean;
 }
 
-function GameCardComponent({ game }: GameCardProps) {
+function GameCardComponent({ game, priority = false }: GameCardProps) {
   const statusConfig = {
     Final: 'bg-green-500/10 text-green-500 border-green-500/20',
     'In Progress': 'bg-orange-500/10 text-orange-500 border-orange-500/20',
@@ -33,12 +35,25 @@ function GameCardComponent({ game }: GameCardProps) {
   const homeIsWinner =
     game.status === 'Final' && game.home_team_score > game.visitor_team_score;
 
+  // Get team branding for dynamic colors
+  const homeBranding = getTeamBranding(game.home_team.abbreviation);
+  const visitorBranding = getTeamBranding(game.visitor_team.abbreviation);
+
+  // Create gradient background with both team colors
+  const cardStyle = homeBranding && visitorBranding ? {
+    background: `linear-gradient(135deg, 
+      ${homeBranding.primaryColor}15 0%, 
+      ${visitorBranding.primaryColor}15 100%)`,
+    borderColor: `${homeBranding.primaryColor}30`,
+  } : {};
+
   return (
     <motion.div
       whileHover={{ scale: 1.02, y: -4 }}
       transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
     >
       <Card 
+        style={cardStyle}
         className="bg-white/5 border-white/10 backdrop-blur-sm hover:bg-white/10 transition-colors"
         role="article"
         aria-label={`Game: ${game.visitor_team.full_name} at ${game.home_team.full_name}`}
@@ -57,6 +72,7 @@ function GameCardComponent({ game }: GameCardProps) {
             team={game.visitor_team}
             score={game.visitor_team_score}
             isWinner={visitorIsWinner}
+            priority={priority}
           />
 
           {/* Home Team */}
@@ -64,6 +80,7 @@ function GameCardComponent({ game }: GameCardProps) {
             team={game.home_team}
             score={game.home_team_score}
             isWinner={homeIsWinner}
+            priority={priority}
           />
 
           {/* Quarter Breakdown - Only show for Final games */}

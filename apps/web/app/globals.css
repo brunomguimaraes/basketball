@@ -105,6 +105,35 @@ body {
   letter-spacing: -0.01em;
 }
 
+button,
+[role="button"],
+a,
+summary,
+label,
+select,
+[type="checkbox"],
+[type="radio"],
+[type="submit"],
+[type="reset"],
+[type="button"] {
+  cursor: pointer;
+}
+
+button:disabled,
+[role="button"][aria-disabled="true"],
+[disabled] {
+  cursor: not-allowed;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="number"],
+textarea {
+  cursor: text;
+}
+
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
   *,

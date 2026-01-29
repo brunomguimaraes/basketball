@@ -58,7 +58,7 @@ export function GamesList({ selectedDate }: GamesListProps) {
               ease: [0.22, 1, 0.36, 1], // Energetic easing
             }}
           >
-            <GameCard game={game} />
+            <GameCard game={game} priority={index < 3} />
           </motion.div>
         ))}
       </AnimatePresence>
